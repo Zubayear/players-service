@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package players;
+
+option go_package = "./proto;players";
+
+service Players {
+  rpc Save(SaveRequest) returns (SaveResponse) {}
+  rpc Get(PlayerRequest) returns (PlayerResponse) {}
+  rpc GetAll(PlayersRequest) returns (PlayersResponse) {}
+  rpc Delete(DeleteRequest) returns (DeleteResponse) {}
+  rpc Filter(FilterRequest) returns (PlayersResponse) {}
+  rpc Update(UpdateRequest) returns (UpdateResponse) {}
+}
+
+message UpdateRequest {
+  string id = 1;
+  string name = 2;
+  Postiton position = 3;
+  string clubName = 4;
+  int32 age = 5;
+}
+
+message UpdateResponse { Player player = 1; }
+
+message FilterRequest {
+  string filterKey = 1;
+  string filterValue = 2;
+}
+
+message SaveRequest {
+  string name = 1;
+  Postiton position = 2;
+  string clubName = 3;
+  int32 age = 4;
+}
+
+enum Postiton {
+  DEFAULT = 0;
+  MIDFIELD = 1;
+  FORWARD = 2;
+  DEFENDER = 3;
+}
+
+message SaveResponse { string id = 1; }
+
+message Player {
+  string id = 1;
+  string name = 2;
+  Postiton position = 3;
+  string clubName = 4;
+  int32 age = 5;
+}
+
+message PlayerRequest { string id = 1; }
+
+message PlayerResponse { Player player = 1; }
+
+message PlayersRequest {}
+
+message PlayersResponse { repeated Player players = 1; }
+
+message DeleteRequest { string id = 1; }
+
+message DeleteResponse {}
