@@ -5,16 +5,13 @@ go 1.16
 require (
 	github.com/Microsoft/go-winio v0.5.1 // indirect
 	github.com/ProtonMail/go-crypto v0.0.0-20220113124808-70ae35bab23f // indirect
+	github.com/asim/go-micro/plugins/config/encoder/yaml/v4 v4.0.0-20220118152736-9e0be6c85d75
 	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
-	github.com/golang/protobuf v1.5.2
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/kevinburke/ssh_config v1.1.0 // indirect
-	github.com/micro/dev v0.0.0-20201117163752-d3cfc9788dfa
 	github.com/miekg/dns v1.1.45 // indirect
-	github.com/pkg/errors v0.9.1
 	github.com/sergi/go-diff v1.2.0 // indirect
-	github.com/stretchr/testify v1.7.0 // indirect
 	github.com/xanzy/ssh-agent v0.3.1 // indirect
 	go-micro.dev/v4 v4.5.0
 	go.mongodb.org/mongo-driver v1.8.2

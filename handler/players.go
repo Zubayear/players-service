@@ -14,10 +14,10 @@ type Players struct {
 func (p *Players) Save(ctx context.Context, req *players.SaveRequest, rsp *players.SaveResponse) error {
 	logger.Infof("Received Players.Save request %v", req)
 	player := &players.Player{
-		Name:     req.GetName(),
-		Position: *req.GetPosition().Enum(),
-		ClubName: req.GetClubName(),
-		Age:      req.GetAge(),
+		Name:     req.Name,
+		Position: req.Position,
+		ClubName: req.ClubName,
+		Age:      req.Age,
 	}
 	val, err := p.MD.Save(ctx, player)
 	if err != nil {
