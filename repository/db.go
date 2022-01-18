@@ -19,9 +19,18 @@ type AgeSpecification struct {
 	Age int
 }
 
+type ClubNameSpecification struct {
+	ClubName string
+}
+
 func (as *AgeSpecification) IsSatisfied(in interface{}) bool {
 	player := in.(*players.Player)
 	return as.Age < int(player.GetAge())
+}
+
+func (ns *ClubNameSpecification) IsSatisfied(in interface{}) bool {
+	player := in.(*players.Player)
+	return ns.ClubName == player.ClubName
 }
 
 type IRepository interface {
@@ -54,7 +63,7 @@ func (md *MongoDB) Save(ctx context.Context, entity interface{}) (interface{}, e
 		{Key: "ClubName", Value: player.ClubName},
 	})
 	if err != nil {
-		logger.Infof("InsertOne error: %v", err)
+		logger.Infof("Entity insert in DB error: %v", err)
 		return nil, err
 	}
 	return res.InsertedID.(primitive.ObjectID).Hex(), nil
@@ -68,10 +77,9 @@ func (md *MongoDB) GetById(ctx context.Context, id string) (interface{}, error) 
 		return nil, err
 	}
 	if err := md.collection.FindOne(ctx, bson.M{"_id": objectId}).Decode(&player); err != nil {
-		logger.Errorf("marshelling error: %v", err)
+		logger.Errorf("marshaling error: %v", err)
 		return nil, err
 	}
-	logger.Infof("From DB: %v", &player)
 	return &player, nil
 }
 
@@ -82,7 +90,7 @@ func (md *MongoDB) Update(ctx context.Context, entity interface{}) (interface{},
 	}
 	objId, err := primitive.ObjectIDFromHex(player.Id)
 	if err != nil {
-		logger.Errorf("primitive.ObjectIDFromHex() error: %v", err)
+		logger.Errorf("Object id conversion error: %v", err)
 		return nil, err
 	}
 	_, err = md.collection.UpdateOne(
@@ -98,7 +106,7 @@ func (md *MongoDB) Update(ctx context.Context, entity interface{}) (interface{},
 		},
 	)
 	if err != nil {
-		logger.Errorf("UpdateOne error: %v", err)
+		logger.Errorf("Update in DB error: %v", err)
 		return nil, err
 	}
 	return md.GetById(ctx, player.Id)
@@ -110,7 +118,7 @@ func (md *MongoDB) Delete(ctx context.Context, entity interface{}) error {
 		"_id": req.Id,
 	})
 	if err != nil {
-		logger.Errorf("Mongo DB DeleteOne error: %v", err)
+		logger.Errorf("Entity delete in DB error: %v", err)
 		return err
 	}
 	return nil
@@ -119,7 +127,7 @@ func (md *MongoDB) Delete(ctx context.Context, entity interface{}) error {
 func (md *MongoDB) GetAll(ctx context.Context) (interface{}, error) {
 	cursor, err := md.collection.Find(ctx, bson.D{})
 	if err != nil {
-		logger.Errorf("Mongo Find error: %v", err)
+		logger.Errorf("Entities retrieve from DB error: %v", err)
 		return nil, err
 	}
 	defer cursor.Close(ctx)
@@ -127,9 +135,8 @@ func (md *MongoDB) GetAll(ctx context.Context) (interface{}, error) {
 	for cursor.Next(ctx) {
 		p := players.Player{}
 		err := cursor.Decode(&p)
-		logger.Infof("p: %v", &p)
 		if err != nil {
-			logger.Errorf("cursor.Decode() error: %v", err)
+			logger.Errorf("Decode error: %v", err)
 			return nil, err
 		}
 		mPlayers = append(mPlayers, &p)
@@ -142,7 +149,7 @@ func (md *MongoDB) GetFilter(ctx context.Context, fk, fv interface{}) (interface
 	filterValue := fv.(string)
 	filterCursor, err := md.collection.Find(ctx, bson.M{filterKey: filterValue})
 	if err != nil {
-		logger.Errorf("Find() error: %v", err)
+		logger.Errorf("Entity filter in DB error: %v", err)
 		return nil, err
 	}
 	defer filterCursor.Close(ctx)
@@ -163,7 +170,6 @@ func (md *MongoDB) GetSpec(ctx context.Context, spec ISpecification) (interface{
 	allPlayers, err := md.GetAll(ctx)
 	logger.Infof("GetAll: %v", allPlayers)
 	if err != nil {
-		logger.Errorf("GetAll() error: %v", err)
 		return nil, err
 	}
 	all := allPlayers.([]*players.Player)

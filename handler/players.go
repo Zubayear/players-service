@@ -2,11 +2,9 @@ package handler
 
 import (
 	"context"
+	"go-micro.dev/v4/logger"
 	players "players/proto"
 	"players/repository"
-	"strconv"
-
-	"go-micro.dev/v4/logger"
 )
 
 type Players struct {
@@ -78,12 +76,9 @@ func (p *Players) Delete(ctx context.Context, req *players.DeleteRequest, rsp *p
 
 func (p *Players) Filter(ctx context.Context, req *players.FilterRequest, rsp *players.PlayersResponse) error {
 	logger.Infof("Request received Players.Filter %v", req)
-	age, err := strconv.Atoi(req.FilterValue)
-	if err != nil {
-		logger.Errorf("strconv.Atoi() error: %v", err)
-		return err
-	}
-	res, err := p.MD.GetSpec(ctx, &repository.AgeSpecification{Age: age})
+	res, err := p.MD.GetSpec(ctx, &repository.ClubNameSpecification{
+		ClubName: req.FilterKey,
+	})
 	if err != nil {
 		logger.Errorf("Filter error: %v", err)
 		return err

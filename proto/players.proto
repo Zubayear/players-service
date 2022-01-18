@@ -16,7 +16,7 @@ service Players {
 message UpdateRequest {
   string id = 1;
   string name = 2;
-  Postiton position = 3;
+  Position position = 3;
   string clubName = 4;
   int32 age = 5;
 }
@@ -30,12 +30,12 @@ message FilterRequest {
 
 message SaveRequest {
   string name = 1;
-  Postiton position = 2;
+  Position position = 2;
   string clubName = 3;
   int32 age = 4;
 }
 
-enum Postiton {
+enum Position {
   DEFAULT = 0;
   MIDFIELD = 1;
   FORWARD = 2;
@@ -47,7 +47,7 @@ message SaveResponse { string id = 1; }
 message Player {
   string id = 1;
   string name = 2;
-  Postiton position = 3;
+  Position position = 3;
   string clubName = 4;
   int32 age = 5;
 }
