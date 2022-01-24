@@ -2,10 +2,6 @@ package main
 
 import (
 	"context"
-	"go-micro.dev/v4/config"
-	"go-micro.dev/v4/config/reader"
-	"go-micro.dev/v4/config/reader/json"
-	"go-micro.dev/v4/config/source/file"
 	"players/handler"
 	pb "players/proto"
 	"players/repository"
@@ -14,6 +10,10 @@ import (
 
 	"github.com/asim/go-micro/plugins/config/encoder/yaml/v4"
 	"go-micro.dev/v4"
+	"go-micro.dev/v4/config"
+	"go-micro.dev/v4/config/reader"
+	"go-micro.dev/v4/config/reader/json"
+	"go-micro.dev/v4/config/source/file"
 	log "go-micro.dev/v4/logger"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -26,6 +26,7 @@ var (
 
 func main() {
 	r := DBSetup()
+
 	// Create service
 	srv := micro.NewService(
 		micro.Name(service),
@@ -36,13 +37,20 @@ func main() {
 	p := handler.Players{
 		MD: r,
 	}
+
+	// create a publisher
+	pub1 := micro.NewPublisher("club.topic.pubsub.1", srv.Client())
+
 	// Register handler
 	pb.RegisterPlayersHandler(srv.Server(), &p)
+
+	go sendEv("club.topic.pubsub.1", r, pub1)
 
 	// Run service
 	if err := srv.Run(); err != nil {
 		log.Fatal(err)
 	}
+
 }
 
 func DBSetup() repository.IRepository {
@@ -96,4 +104,24 @@ func loadConfig() (*Host, error) {
 	}
 
 	return host, nil
+}
+
+// Send using the publisher
+func sendEv(topic string, r repository.IRepository, p micro.Publisher) {
+	t := time.NewTicker(10 * time.Second)
+
+	for _ = range t.C {
+		ev, err := r.GetById(context.Background(), "61e6e44d7feb9029a24ea875")
+
+		if err != nil {
+			log.Errorf(err.Error())
+		}
+
+		log.Infof("publishing %+v", ev)
+
+		// publish an event
+		if err := p.Publish(context.Background(), ev); err != nil {
+			log.Infof("error publishing: %v", err)
+		}
+	}
 }
